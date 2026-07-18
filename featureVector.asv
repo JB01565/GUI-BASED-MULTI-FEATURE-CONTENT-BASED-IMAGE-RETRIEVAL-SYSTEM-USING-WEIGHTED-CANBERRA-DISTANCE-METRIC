@@ -1,0 +1,40 @@
+function f = featureVector(image)
+    % 1. Resize for consistency (optional but recommended)
+    image = imresize(image, [300 300]);
+    
+    % 2. Define the 3x3 Grid
+    [rows, cols, ~] = size(image);
+    rStep = floor(rows/3);
+    cStep = floor(cols/3);
+    
+    combined_f = []; % Initialize empty vector
+    
+    % 3. Loop through each of the 9 blocks
+    for r = 1:3
+        for c = 1:3
+            % Define the boundaries for this specific block
+            row_range = (r-1)*rStep + 1 : r*rStep;
+            col_range = (c-1)*cStep + 1 : c*cStep;
+            block = image(row_range, col_range, :);
+            
+            % --- EXTRACTION PER BLOCK ---
+            
+            % A. Color Moments (Local)
+            block_cm = colorMoment(block);
+            
+            % B. Gabor Features (Local)
+            block_gabor = gaborFeature(block);
+            block_gabor = block_gabor(:)';
+            
+            % C. Standard LBP (Since you are disregarding ULBP)
+            block_lbp = lbp(block, 3);
+            block_lbp = block_lbp(:)';
+            
+            % Concatenate this block's data to the main vector
+            combined_f = [combined_f block_cm block_lbp block_gabor];
+        end
+    end
+    
+    % 4. Return the final long vector
+    f = combined_f; 
+end
